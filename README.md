@@ -1,6 +1,6 @@
 # cfn
 A simple command-line tool to tail human-readable [AWS CloudFormation](https://aws.amazon.com/cloudformation/) events. This may be useful when developing and testing CloudFormation templates, or when monitoring infrastructure deployments.
-##Install
+## Install
 ```
 go get github.com/rpgreen/cfn
 go build
@@ -10,7 +10,7 @@ go build
 aws configure
 ```
 
-##Use
+## Use
 ```
 Usage: cfn [-c command] [-s stackname] [-r region] [-p profile]
   -c string
@@ -26,7 +26,7 @@ i.e.
 ```
 ./cfn -s mystack -p rpgreen -r us-east-1
 ```
-![screenshot](https://github.com/rpgreen/cfn/blob/master/ss.png)
+<img src="https://github.com/rpgreen/cfn/blob/master/ss.png" height="150"/>
 
 By default, cfn will use the default credential provider chain and shared region config used by the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#config-settings-and-precedence).
 
