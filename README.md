@@ -26,7 +26,7 @@ i.e.
 ```
 ./cfn -s mystack -p rpgreen -r us-east-1
 ```
-<img src="https://github.com/rpgreen/cfn/blob/master/ss.png" height="150"/>
+<img src="https://github.com/rpgreen/cfn/blob/master/ss.png" width="769" height="176"/>
 
 By default, cfn will use the default credential provider chain and shared region config used by the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#config-settings-and-precedence).
 
