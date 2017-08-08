@@ -32,7 +32,7 @@ Usage: cfn [-c command] [-s stackname] [-r region] [-p profile]
 ```
 <img src="https://github.com/rpgreen/cfn/blob/master/ss.png" width="769" height="176"/>
 
-By default, cfn will look for credentials using the default credential provider chain used by the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#config-settings-and-precedence). Similary, the default region is based on the AWS CLI configuration.
+By default, cfn will look for credentials using the default credential provider chain used by the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#config-settings-and-precedence). Similarly, the default region is based on the AWS CLI configuration.
 
 To provide a custom credential profile, use the -p option. To override the default region, use the -r option.
 
