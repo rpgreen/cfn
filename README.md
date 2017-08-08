@@ -24,11 +24,15 @@ Usage: cfn [-c command] [-s stackname] [-r region] [-p profile]
 ## Examples
 ### Tail events from the most recently updated stack using default AWS credentials and region
 ```
-./cfn
+$ ./cfn
 ```
 ### Tail events using specified stack and region, and using specified AWS credentials profile
 ```
-./cfn -s mystack -p myprofile -r us-east-1
+$ ./cfn -s mystack -p myprofile -r us-east-1
+```
+### Tail events after creating/updating a stack
+```
+$ aws cloudformation create-stack --stack-name mystack --template-body file://mytemplate.yml && cfn -s mystack
 ```
 <img src="https://github.com/rpgreen/cfn/blob/master/ss.png" width="769" height="176"/>
 
