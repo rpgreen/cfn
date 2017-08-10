@@ -1,4 +1,4 @@
-package main
+package src
 
 import (
 	"fmt"
@@ -47,6 +47,8 @@ func printEvent(event cloudformation.StackEvent) {
 	}
 
 	fmt.Fprintf(writer, "%s\n", reset)
+
+	// todo: group by resource?
 	//writer.Flush()
 }
 

@@ -3,7 +3,6 @@ A simple command-line tool to tail human-readable [AWS CloudFormation](https://a
 ## Install
 ```
 go get github.com/rpgreen/cfn
-go build
 ```
 (Optional) Configure aws cli
 ```

@@ -1,4 +1,4 @@
-package main
+package cfn
 
 import (
     "fmt"
@@ -161,6 +161,7 @@ func describeStackEvents(cfn cloudformation.CloudFormation,
             StackName: aws.String(stack),
         })
 
+    // todo: handle deleted
     if err != nil {
         fmt.Printf("%+v\n", err)
         os.Exit(1)
