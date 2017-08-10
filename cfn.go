@@ -1,4 +1,4 @@
-package cfn
+package main
 
 import (
     "fmt"
