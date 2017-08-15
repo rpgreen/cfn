@@ -19,6 +19,8 @@ Usage: cfn [-c command] [-s stackname] [-r region] [-p profile]
     	AWS region to use (optional)
   -s string
     	Stack to use (optional)
+  -o string
+        Output format to use (text or table) (default "text")
 ```
 ## Examples
 ### Tail events from the most recently updated stack using default AWS credentials and region

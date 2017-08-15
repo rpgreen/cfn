@@ -11,23 +11,36 @@ import (
     "flag"
     "sort"
     "github.com/mgutz/ansi"
+    "os/signal"
+    "syscall"
 )
+
+var format string
 
 func init() {
     flag.Usage = func() {
-        fmt.Fprintf(os.Stderr, "Usage: cfn [-c command] [-s stackname] [-r region] [-p profile]\n")
+        fmt.Fprintf(os.Stderr, "Usage: cfn [-c command] [-s stackname] [-r region] [-p profile] [-o output] \n")
         flag.PrintDefaults()
     }
 }
 
 func main() {
+    c := make(chan os.Signal, 2)
+    signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+    go func() {
+        <-c
+        exit()
+    }()
+
     command := flag.String("c", "tail", "Command to use (i.e. 'tail')")
     stackname := flag.String("s", "", "Stack to use (optional)")
     profile := flag.String("p", "", "AWS SDK profile name to use (optional)")
     region := flag.String("r", "", "AWS region to use (optional)")
+    output := flag.String("o", "table", "Output format to use (text or table)")
 
     flag.Parse()
 
+    format = *output
     cfn := createCloudFormationClient(profile, region)
 
     switch *command {
@@ -74,10 +87,18 @@ func tail(cfn cloudformation.CloudFormation, stack string) {
 
         sort.Sort(ByTimeStampAscending(events))
 
-        PrintEvents(events)
+        printEvents(events)
+
         time.Sleep(5 * time.Second)
 
         lasttimestamp = *res.StackEvents[0].Timestamp
+    }
+}
+func printEvents(events []*cloudformation.StackEvent) {
+    if format == "table" {
+        PrintEventsAsTable(events)
+    } else {
+        PrintEventsAsLog(events)
     }
 }
 
@@ -173,4 +194,10 @@ func describeStackEvents(cfn cloudformation.CloudFormation,
 func exitWithHelp() {
     flag.Usage()
     os.Exit(1)
+}
+
+func exit() {
+    //tm.Clear();
+    fmt.Print("Exiting")
+    os.Exit(0)
 }
