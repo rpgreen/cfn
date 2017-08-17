@@ -88,6 +88,10 @@ func tail(cfn cloudformation.CloudFormation, stack string) {
         events = describeStackEvents(cfn, stack, events, "")
         events = filterEvents(events, lasttimestamp)
 
+        if len(events) == 0 {
+            continue
+        }
+
         sort.Sort(ByTimeStampAscending(events))
 
         printEvents(events)
