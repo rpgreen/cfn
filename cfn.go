@@ -13,6 +13,7 @@ import (
     "github.com/mgutz/ansi"
     "os/signal"
     "syscall"
+    "github.com/buger/goterm"
 )
 
 var format string
@@ -82,8 +83,10 @@ func tail(cfn cloudformation.CloudFormation, stack string) {
     var lasttimestamp = time.Unix(0, 0)
 
     for {
-        res := describeStackEvents(cfn, stack)
-        events := filterEvents(res.StackEvents, lasttimestamp)
+
+        var events []*cloudformation.StackEvent
+        events = describeStackEvents(cfn, stack, events, "")
+        events = filterEvents(events, lasttimestamp)
 
         sort.Sort(ByTimeStampAscending(events))
 
@@ -91,19 +94,19 @@ func tail(cfn cloudformation.CloudFormation, stack string) {
 
         time.Sleep(5 * time.Second)
 
-        lasttimestamp = *res.StackEvents[0].Timestamp
+        lasttimestamp = *events[0].Timestamp
     }
 }
+
 func printEvents(events []*cloudformation.StackEvent) {
-    if format == "table" {
-        PrintEventsAsTable(events)
-    } else {
+    if format == "text" {
         PrintEventsAsLog(events)
+    } else {
+        PrintEventsAsTable(events)
     }
 }
 
 type ByTimeStampAscending []*cloudformation.StackEvent
-
 func (a ByTimeStampAscending) Len() int           { return len(a) }
 func (a ByTimeStampAscending) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByTimeStampAscending) Less(i, j int) bool { return a[i].Timestamp.Sub(*a[j].Timestamp) < 0 }
@@ -156,7 +159,10 @@ func getLastUpdatedStack(cfn cloudformation.CloudFormation) string {
             continue
         }
         stackname := *stack.StackName
-        events := describeStackEvents(cfn, stackname).StackEvents
+
+        var events []*cloudformation.StackEvent
+        events = describeStackEvents(cfn, stackname, events, "")
+
         if events[0].Timestamp.Sub(maxtime) > 0 {
             maxtime = *events[0].Timestamp
             maxstack = stackname
@@ -175,20 +181,30 @@ func errormsg(msg string) {
     fmt.Println(ansi.Color(msg, "red+b"))
 }
 
-func describeStackEvents(cfn cloudformation.CloudFormation,
-    stack string) cloudformation.DescribeStackEventsOutput {
-    res, err :=cfn.DescribeStackEvents(
-        &cloudformation.DescribeStackEventsInput{
-            StackName: aws.String(stack),
-        })
+func describeStackEvents(cfn cloudformation.CloudFormation, stack string,
+    events []*cloudformation.StackEvent, nexttoken string) []*cloudformation.StackEvent {
 
-    // todo: handle deleted
+    input := cloudformation.DescribeStackEventsInput{
+        StackName: aws.String(stack),
+    }
+    if nexttoken != "" {
+        input.NextToken = &nexttoken
+    }
+
+    res, err := cfn.DescribeStackEvents(&input)
     if err != nil {
         fmt.Printf("%+v\n", err)
         os.Exit(1)
     }
+    for _, e := range res.StackEvents {
+        events = append(events, e)
+    }
 
-    return *res
+    if res.NextToken != nil {
+        return describeStackEvents(cfn, stack, events, *res.NextToken)
+    } else {
+        return events
+    }
 }
 
 func exitWithHelp() {
@@ -197,7 +213,6 @@ func exitWithHelp() {
 }
 
 func exit() {
-    //tm.Clear();
-    fmt.Print("Exiting")
+    goterm.Clear()
     os.Exit(0)
 }

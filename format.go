@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
     "github.com/olekukonko/tablewriter"
-	tm "github.com/buger/goterm"
+	"github.com/buger/goterm"
 	"github.com/mgutz/ansi"
 	"os"
 	"strings"
 	"github.com/dustin/go-humanize"
+	//"time"
 )
 
 var red = ansi.ColorCode("red+b")
@@ -20,7 +21,7 @@ var writer = os.Stdout
 var eventmap map[string]*cloudformation.StackEvent = make(map[string]*cloudformation.StackEvent)
 var stackname string
 var stackevent *cloudformation.StackEvent
-var table = tablewriter.NewWriter(tm.Output)
+var table = tablewriter.NewWriter(goterm.Output)
 
 func PrintEventsAsTable(events []*cloudformation.StackEvent) {
 	if len(events) == 0 {
@@ -30,29 +31,57 @@ func PrintEventsAsTable(events []*cloudformation.StackEvent) {
 	printEventTable()
 }
 
-func printEventTable() {
+func getTableData() [][]string {
 	data := make([][]string, len(eventmap))
-
 	i := 0
 	for id, event := range eventmap {
 		if id == stackname {
 			stackevent = event
 		} else {
-			data[i] = []string{id, getTimestamp(event), getStatusString(*event.ResourceStatus)}
+			data[i] = []string{id, getTimestamp(event),
+				getStatusString(*event.ResourceStatus),
+				getReasonString(event.ResourceStatusReason)}
 			i++
 		}
-		// todo: sort data by resource name or status
 	}
 
-	//tm.Clear()
-	tm.MoveCursor(1, 1)
-	table.SetHeader([]string{"Resource", "Time", "Status"})
-	table.SetFooter([]string{stackname, getTimestamp(stackevent), getStatusString(*stackevent.ResourceStatus)})
+	return data
+}
+
+func printEventTable() {
+	goterm.Clear()
+	goterm.MoveCursor(1, 1)
+
+	table.SetHeader([]string{"Resource", "Time", "Status", "Reason"})
+	if stackevent != nil {
+		table.SetFooter([]string{stackname,
+			getTimestamp(stackevent),
+			getStatusString(*stackevent.ResourceStatus), ""})
+	}
 	table.SetBorder(false)
 	table.SetAutoFormatHeaders(false)
-	table.AppendBulk(data)
+	table.ClearRows()
+	table.AppendBulk(getTableData())
 	table.Render()
-	tm.Flush()
+
+	goterm.Flush()
+}
+
+func updateEventMap(events []*cloudformation.StackEvent) {
+	stackname = *events[0].StackName
+	for _, event := range events {
+		if event != nil {
+			eventmap[*event.LogicalResourceId] = event
+		}
+	}
+}
+
+func getReasonString(reason *string) string {
+	if reason != nil {
+		return *reason
+	} else {
+		return ""
+	}
 }
 
 func getStatusString(status string) string {
@@ -60,15 +89,12 @@ func getStatusString(status string) string {
 }
 
 func getTimestamp(event *cloudformation.StackEvent) string {
-	return humanize.Time(*event.Timestamp)
-	//return event.Timestamp.Local().Format(time.UnixDate)
-}
-
-func updateEventMap(events []*cloudformation.StackEvent) {
-	stackname = *events[0].StackName
-	for _, event := range events {
-		eventmap[*event.LogicalResourceId] = event
+	if event == nil || event.Timestamp == nil {
+		return ""
 	}
+	return humanize.Time(*event.Timestamp)
+
+	//return event.Timestamp.Local().Format(time.UnixDate)
 }
 
 func PrintEventsAsLog(events []*cloudformation.StackEvent) {
