@@ -37,7 +37,7 @@ func main() {
     stackname := flag.String("s", "", "Stack to use (optional)")
     profile := flag.String("p", "", "AWS SDK profile name to use (optional)")
     region := flag.String("r", "", "AWS region to use (optional)")
-    output := flag.String("o", "table", "Output format to use (text or table)")
+    output := flag.String("o", "text", "Output format to use (text or table)")
 
     flag.Parse()
 

@@ -49,6 +49,7 @@ func getTableData() [][]string {
 }
 
 func printEventTable() {
+    // TODO: fix terminal formatting
 	goterm.Clear()
 	goterm.MoveCursor(1, 1)
 
