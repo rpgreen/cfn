@@ -200,7 +200,7 @@ func describeStackEvents(cfn cloudformation.CloudFormation, stack string,
 	res, err := cfn.DescribeStackEvents(&input)
 	if err != nil {
 		if awsErr, ok := err.(awserr.Error); ok {
-			if strings.Contains(awsErr.Message(), "Throttling") {
+			if strings.Contains(awsErr.Message(), "Rate exceeded") {
 				time.Sleep(5 * time.Second)
 			} else {
 				fmt.Printf("%+v\n", err)
